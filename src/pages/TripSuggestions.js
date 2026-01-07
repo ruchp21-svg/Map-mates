@@ -522,8 +522,14 @@ function TripSuggestions({ currentUser }) {
           </div>
         ) : noResults ? (
           <div className="no-suggestions">
-            <p>No trips match your selected interests yet.</p>
-            <p>Try adjusting your filters or explore other categories!</p>
+            <div style={{textAlign: 'center', padding: '60px', background: 'white', borderRadius: '16px'}}>
+              <div style={{fontSize: '48px', marginBottom: '16px'}}>🤖</div>
+              <h3>No AI suggestions found</h3>
+              <p>Try adjusting your filters or explore other categories to get personalized recommendations!</p>
+              <button onClick={() => setSelectedInterests([])} style={{marginTop: '16px', padding: '12px 24px', background: '#4F46E5', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer'}}>
+                Reset Filters
+              </button>
+            </div>
           </div>
         ) : null}
       </div>

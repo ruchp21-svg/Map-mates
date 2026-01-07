@@ -191,6 +191,15 @@ function Home({ currentUser }) {
                     <div className="detail-item">
                       <span className="detail-icon">🏠</span>
                       <span className="detail-text">Hosted by <strong>{trip.hostName}</strong></span>
+                      {!isHost && (
+                        <Link 
+                          to={`/host/${trip.hostId}`} 
+                          className="view-host-btn"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          View Host
+                        </Link>
+                      )}
                     </div>
                   </div>
 

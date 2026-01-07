@@ -135,3 +135,60 @@ body {
     padding: 10px;
   }
 }
+@media (max-width: 768px) {
+  .container {
+    padding: 20px 16px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px;
+    border-radius: 16px;
+  }
+
+  .page-header h1 {
+    font-size: 24px;
+  }
+
+  .card {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .trips-container {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .trip-card {
+    border-radius: 16px;
+  }
+
+  .trip-content {
+    padding: 16px;
+  }
+
+  .trip-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .nav-container {
+    padding: 12px 20px;
+  }
+
+  .nav-menu {
+    gap: 12px;
+  }
+
+  .nav-link {
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+
+  .nav-logo {
+    font-size: 20px;
+  }
+}

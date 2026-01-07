@@ -430,15 +430,14 @@ function Feedback({ currentUser }) {
               </div>
             ) : (
               <div className="empty-state">
-                <p className="empty-icon">🗺️</p>
-                <h3>No trips created yet</h3>
-                <p>Create your first trip to get started and start hosting adventures!</p>
-                <button
-                  onClick={() => navigate('/create-trip')}
-                  className="btn btn-primary"
-                >
-                  Create a Trip
-                </button>
+                <div style={{textAlign: 'center', padding: '60px', background: 'white', borderRadius: '16px'}}>
+                  <div style={{fontSize: '48px', marginBottom: '16px'}}>🗺️</div>
+                  <h3>No trips created yet</h3>
+                  <p>Create your first trip to get started and start hosting adventures!</p>
+                  <button onClick={() => navigate('/create-trip')} style={{marginTop: '16px', padding: '12px 24px', background: '#4F46E5', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer'}}>
+                    Create a Trip
+                  </button>
+                </div>
               </div>
             )
           ) : filteredReviews.length > 0 ? (
@@ -494,25 +493,16 @@ function Feedback({ currentUser }) {
             </div>
           ) : (
             <div className="empty-state">
-              <p className="empty-icon">
-                {activeTab === 'received' ? '📭' : '✍️'}
-              </p>
-              <h3>
-                {activeTab === 'received'
-                  ? 'No reviews received yet'
-                  : 'No reviews given yet'}
-              </h3>
-              <p>
-                {activeTab === 'received'
+              <div style={{textAlign: 'center', padding: '60px', background: 'white', borderRadius: '16px'}}>
+                <div style={{fontSize: '48px', marginBottom: '16px'}}>📭</div>
+                <h3>{activeTab === 'received' ? 'No reviews received yet' : 'No reviews given yet'}</h3>
+                <p>{activeTab === 'received' 
                   ? 'Once participants complete your trips, they can leave reviews and ratings.'
-                  : 'After you complete trips, you can leave reviews and ratings for the hosts.'}
-              </p>
-              <button
-                onClick={() => navigate('/home')}
-                className="btn btn-primary"
-              >
-                {activeTab === 'received' ? 'Create a Trip' : 'Find Trips'}
-              </button>
+                  : 'After you complete trips, you can leave reviews and ratings for the hosts.'}</p>
+                <button onClick={() => navigate('/home')} style={{marginTop: '16px', padding: '12px 24px', background: '#4F46E5', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer'}}>
+                  {activeTab === 'received' ? 'Create a Trip' : 'Find Trips'}
+                </button>
+              </div>
             </div>
           )}
         </div>

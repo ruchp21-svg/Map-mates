@@ -18,11 +18,12 @@ function Navbar({ onLogout, currentUser }) {
         </Link>
         <div className="nav-menu">
           <Link to="/home" className="nav-link">Trips</Link>
-          <Link to="/explore" className="nav-link">🔍 Explore</Link>
-          <Link to="/suggestions" className="nav-link">🤖 Suggestions</Link>
+          <Link to="/explore" className="nav-link">Explore</Link>
+          <Link to="/my-trips-map" className="nav-link">Map</Link>
+          <Link to="/suggestions" className="nav-link">Suggestions</Link>
           <Link to="/chat" className="nav-link">Messages</Link>
           <Link to="/karma" className="nav-link">Karma</Link>
-          <Link to="/feedback" className="nav-link">📋 Feedback</Link>
+          <Link to="/feedback" className="nav-link">Feedback</Link>
           <Link to="/profile" className="nav-link">Profile</Link>
           <button onClick={handleLogout} className="nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
             Logout

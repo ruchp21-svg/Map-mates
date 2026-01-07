@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { db } from '../firebaseUtils';
+import { db, getTrip } from '../firebaseUtils';
 import { collection, addDoc, query, where, getDocs, serverTimestamp } from 'firebase/firestore';
 import StarRating from '../components/StarRating';
 import HostReplySection from '../components/HostReplySection';
@@ -26,9 +26,16 @@ function TripReview({ currentUser }) {
   useEffect(() => {
     const loadTripData = async () => {
       try {
-        // Load trip from localStorage
-        const trips = JSON.parse(localStorage.getItem('mapmates_trips')) || [];
-        const currentTrip = trips.find(t => t.id === tripId);
+        let currentTrip = null;
+        
+        // Try Firebase first
+        currentTrip = await getTrip(tripId);
+        
+        // If not found in Firebase, try localStorage
+        if (!currentTrip) {
+          const trips = JSON.parse(localStorage.getItem('mapmates_trips')) || [];
+          currentTrip = trips.find(t => t.id === tripId);
+        }
 
         if (!currentTrip) {
           setError('Trip not found');

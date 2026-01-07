@@ -350,7 +350,14 @@ function Chat({ currentUser }) {
 
         {tripIds.length === 0 ? (
           <div className="empty-chats">
-            <p>No messages yet. Join a trip and start chatting!</p>
+            <div style={{textAlign: 'center', padding: '60px', background: 'white', borderRadius: '16px'}}>
+              <div style={{fontSize: '48px', marginBottom: '16px'}}>💬</div>
+              <h3>No messages yet</h3>
+              <p>Join a trip and start chatting with fellow travelers!</p>
+              <button onClick={() => navigate('/explore')} style={{marginTop: '16px', padding: '12px 24px', background: '#4F46E5', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer'}}>
+                Find Trips
+              </button>
+            </div>
           </div>
         ) : (
           <div className="conversations-list">

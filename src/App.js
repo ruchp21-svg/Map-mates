@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { onAuthChange, logoutUser, getUserProfile, removeDuplicateTrips } from './firebaseUtils';
 import './App.css';
 import Navbar from './components/Navbar';
+import AIChatbot from './components/AIChatbot';
+import AIChatbotPage from './pages/AIChatbotPage';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import ResetPassword from './pages/ResetPassword';
@@ -20,6 +22,8 @@ import TripReview from './pages/TripReview';
 import Feedback from './pages/Feedback';
 import TripLocationMap from './pages/TripLocationMap';
 import TripSuggestions from './pages/TripSuggestions';
+import MyTripsMap from './pages/MyTripsMap';
+import HostProfile from './pages/HostProfile';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -123,7 +127,12 @@ function App() {
               <Route path="/trip-review/:tripId" element={isAuthenticated ? <TripReview currentUser={currentUser} /> : <Navigate to="/login" />} />
               <Route path="/trip-location/:tripId" element={isAuthenticated ? <TripLocationMap currentUser={currentUser} /> : <Navigate to="/login" />} />
               <Route path="/suggestions" element={isAuthenticated ? <TripSuggestions currentUser={currentUser} /> : <Navigate to="/login" />} />
+              <Route path="/my-trips-map" element={isAuthenticated ? <MyTripsMap currentUser={currentUser} /> : <Navigate to="/login" />} />
+              <Route path="/host/:hostId" element={isAuthenticated ? <HostProfile currentUser={currentUser} /> : <Navigate to="/login" />} />
+              <Route path="/ai-chat" element={isAuthenticated ? <AIChatbotPage currentUser={currentUser} /> : <Navigate to="/login" />} />
             </Routes>
+            {/* AI Chatbot - Available on all pages */}
+            <AIChatbot />
           </>
         )}
       </div>
