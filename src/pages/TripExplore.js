@@ -182,9 +182,19 @@ function TripExplore({ currentUser }) {
           {/* Trips Grid */}
           {filteredTrips.length > 0 ? (
             <div className="trips-grid">
-              {filteredTrips.map((trip) => (
+              {filteredTrips.map((trip, index) => (
                 <div key={trip.id} className="trip-card">
                   <div className="trip-card-image">
+                    <img 
+                      src={trip.image || [
+                        'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=200&fit=crop',
+                        'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400&h=200&fit=crop',
+                        'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=400&h=200&fit=crop',
+                        'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=400&h=200&fit=crop'
+                      ][index % 4]} 
+                      alt={trip.title}
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
                     <div className="trip-category-badge">{trip.category}</div>
                   </div>
                   
