@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot - ChatGPT Style</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f7f7f8;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .chat-container {
+            width: 800px;
+            height: 600px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid #e5e5e5;
+            background: #fff;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .chat-header h1 {
+            font-size: 20px;
+            color: #202123;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 0;
+        }
+        
+        .message {
+            margin-bottom: 20px;
+            padding: 0 20px;
+        }
+        
+        .user-message {
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .bot-message {
+            display: flex;
+            justify-content: flex-start;
+        }
+        
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 15px;
+            line-height: 1.4;
+        }
+        
+        .user-message .message-content {
+            background: #007bff;
+            color: white;
+        }
+        
+        .bot-message .message-content {
+            background: #f1f3f4;
+            color: #202123;
+            white-space: pre-wrap;
+        }
+        
+        .chat-input {
+            border-top: 1px solid #e5e5e5;
+            padding: 20px;
+            background: white;
+            border-radius: 0 0 8px 8px;
+        }
+        
+        .input-form {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .input-field {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 16px;
+            outline: none;
+        }
+        
+        .input-field:focus {
+            border-color: #007bff;
+        }
+        
+        .send-btn {
+            padding: 12px 24px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .send-btn:hover {
+            background: #0056b3;
+        }
+        
+        .send-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .typing {
+            padding: 0 20px;
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>AI Assistant</h1>
+        </div>
+        
+        <div class="chat-messages" id="messages">
+            <div class="message bot-message">
+                <div class="message-content">Hello! I'm an AI assistant. I can help you with questions, explanations, creative writing, coding, math problems, and much more. What would you like to know?</div>
+            </div>
+        </div>
+        
+        <div class="chat-input">
+            <form class="input-form" onsubmit="sendMessage(event)">
+                <input type="text" class="input-field" id="messageInput" placeholder="Ask me anything..." required>
+                <button type="submit" class="send-btn" id="sendBtn">Send</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const messagesContainer = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        let isTyping = false;
+
+        function addMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}-message`;
+            messageDiv.innerHTML = `<div class="message-content">${content}</div>`;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function showTyping() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'typing';
+            typingDiv.id = 'typing-indicator';
+            typingDiv.textContent = 'AI is typing...';
+            messagesContainer.appendChild(typingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function hideTyping() {
+            const typing = document.getElementById('typing-indicator');
+            if (typing) typing.remove();
+        }
+
+        function getAIResponse(message) {
+            const msg = message.toLowerCase();
+            
+            // Greetings
+            if (msg.match(/^(hi|hello|hey|good morning|good evening)/)) {
+                return "Hello! I'm here to help you with anything you need. You can ask me about science, technology, creative writing, math problems, coding, life advice, or any other topic. What's on your mind today?";
+            }
+            
+            // What can you do
+            if (msg.includes('what can you') || msg.includes('help me') || msg.includes('what do you do')) {
+                return `I can help you with a wide variety of tasks:
+
+• Answer questions on virtually any topic
+• Explain complex concepts in simple terms
+• Help with creative writing and storytelling
+• Solve math problems step by step
+• Assist with coding and programming
+• Provide life advice and planning tips
+• Discuss science, history, literature, and more
+• Help with homework and research
+• Brainstorm ideas for projects
+• Analyze and summarize information
+
+Just ask me anything you're curious about!`;
+            }
+            
+            // Science questions
+            if (msg.includes('quantum') || msg.includes('physics')) {
+                return `Quantum physics is fascinating! Here's a simple explanation:
+
+Quantum mechanics describes the behavior of matter and energy at the smallest scales. Key concepts include:
+
+• **Superposition**: Particles can exist in multiple states simultaneously until observed
+• **Entanglement**: Particles can be instantly connected across vast distances
+• **Uncertainty Principle**: You can't precisely know both the position and momentum of a particle
+• **Wave-Particle Duality**: Matter and energy exhibit both wave and particle properties
+
+Real-world applications include:
+- Quantum computers for solving complex problems
+- MRI machines in medical imaging
+- Laser technology
+- GPS satellites (which need quantum corrections for accuracy)
+
+The famous "Schrödinger's cat" thought experiment illustrates how quantum objects can be in multiple states at once until observed.
+
+Would you like me to explain any specific aspect of quantum physics in more detail?`;
+            }
+            
+            // Math help
+            if (msg.includes('math') || msg.includes('calculate') || msg.includes('solve')) {
+                return `I'd be happy to help with math! Here's how I approach problems:
+
+**Problem-Solving Steps:**
+1. **Read carefully** - Understand what's being asked
+2. **Identify the type** - Algebra, geometry, calculus, etc.
+3. **Choose the method** - Select appropriate formulas or techniques
+4. **Work step-by-step** - Show all calculations
+5. **Check the answer** - Does it make sense?
+
+**Example Problem:**
+"If a car travels 240 miles in 4 hours, what's its average speed?"
+
+Solution:
+• Formula: Speed = Distance ÷ Time
+• Speed = 240 miles ÷ 4 hours = 60 mph
+
+I can help with:
+- Basic arithmetic and algebra
+- Geometry and trigonometry
+- Calculus and derivatives
+- Statistics and probability
+- Word problems and applications
+
+Share your specific math problem and I'll walk you through it!`;
+            }
+            
+            // Coding help
+            if (msg.includes('code') || msg.includes('programming') || msg.includes('javascript') || msg.includes('python')) {
+                return `I'd love to help with programming! Here are some key principles:
+
+**Clean Code Guidelines:**
+• Write readable, self-documenting code
+• Use meaningful variable and function names
+• Keep functions small and focused
+• Comment complex logic
+• Follow consistent formatting
+
+**Common Programming Concepts:**
+• **Variables**: Store data values
+• **Functions**: Reusable blocks of code
+• **Loops**: Repeat actions efficiently
+• **Conditionals**: Make decisions in code
+• **Arrays/Lists**: Store multiple values
+
+**Debugging Tips:**
+1. Read error messages carefully
+2. Use console.log() or print() to trace execution
+3. Break complex problems into smaller parts
+4. Test with simple inputs first
+5. Take breaks when stuck
+
+**Example (JavaScript):**
+\`\`\`javascript
+function greetUser(name) {
+    return "Hello, " + name + "!";
+}
+
+console.log(greetUser("Alice")); // Output: Hello, Alice!
+\`\`\`
+
+What programming language or concept would you like help with?`;
+            }
+            
+            // Creative writing
+            if (msg.includes('story') || msg.includes('write') || msg.includes('creative')) {
+                return `I'd love to help with creative writing! Here's a story starter:
+
+**"The Memory Thief"**
+
+Elena discovered she could steal memories by touching old objects. A vintage watch held a soldier's last moments, a faded photograph contained a mother's lullaby, and an antique key unlocked the secret of a lost treasure.
+
+But when she touched her grandmother's diary, she saw something that changed everything...
+
+**Writing Tips:**
+• **Start with "What if?"** - Explore interesting scenarios
+• **Show, don't tell** - Use actions and dialogue to reveal character
+• **Use sensory details** - Engage all five senses
+• **Create conflict** - Give characters obstacles to overcome
+• **End with impact** - Leave readers wanting more
+
+**Story Elements:**
+• **Character**: Who is your protagonist?
+• **Setting**: Where and when does it take place?
+• **Conflict**: What problem must be solved?
+• **Theme**: What message or emotion do you want to convey?
+
+Would you like me to continue this story or help you develop your own idea?`;
+            }
+            
+            // Life advice
+            if (msg.includes('advice') || msg.includes('help') || msg.includes('plan') || msg.includes('productivity')) {
+                return `I'm happy to offer some life advice! Here are some universal principles:
+
+**Personal Growth:**
+• Embrace a growth mindset - see challenges as opportunities
+• Learn continuously - read, explore, ask questions
+• Practice self-reflection - understand your strengths and areas for improvement
+• Set clear, achievable goals and track your progress
+
+**Productivity Tips:**
+• Prioritize important tasks over urgent ones
+• Use time-blocking to focus on specific activities
+• Take regular breaks to maintain energy and focus
+• Eliminate distractions during work time
+
+**Relationships:**
+• Listen actively and show genuine interest in others
+• Practice empathy and try to understand different perspectives
+• Communicate clearly and honestly
+• Maintain healthy boundaries
+
+**Well-being:**
+• Take care of your physical health through exercise and good nutrition
+• Practice stress management techniques like meditation or deep breathing
+• Maintain work-life balance
+• Cultivate gratitude and positive thinking
+
+What specific area would you like advice on?`;
+            }
+            
+            // General knowledge
+            if (msg.includes('explain') || msg.includes('what is') || msg.includes('how does') || msg.includes('why')) {
+                return `I'd be happy to explain! I have knowledge about many topics including:
+
+**Science & Technology:**
+- Physics, chemistry, biology, astronomy
+- Computer science, artificial intelligence
+- Engineering, medicine, environmental science
+
+**History & Culture:**
+- World history, civilizations, historical events
+- Art, literature, music, philosophy
+- Different cultures and traditions
+
+**Current Topics:**
+- Recent scientific discoveries
+- Technological innovations
+- Social and economic trends
+
+**Practical Knowledge:**
+- How things work (machines, processes, systems)
+- Problem-solving techniques
+- Learning strategies
+
+To give you the best explanation, could you be more specific about what you'd like to know? For example:
+- "Explain how photosynthesis works"
+- "What caused World War I?"
+- "How do computers process information?"
+
+The more specific your question, the more detailed and helpful my answer can be!`;
+            }
+            
+            // Default response for anything else
+            return `That's an interesting question! I'd be happy to help you explore that topic.
+
+I can provide information and assistance on virtually any subject. Whether you're curious about:
+
+• **Science and Technology** - From quantum physics to artificial intelligence
+• **History and Culture** - Ancient civilizations to modern events
+• **Creative Projects** - Writing, art, music, and design
+• **Problem Solving** - Math, logic, coding, and analysis
+• **Personal Development** - Learning, productivity, and life skills
+• **Current Events** - Recent discoveries and innovations
+
+Could you provide a bit more detail about what specifically you'd like to know? The more specific your question, the more helpful and detailed my response can be.
+
+For example, instead of "tell me about space," you might ask "how do black holes form?" or "what makes Mars different from Earth?"
+
+What would you like to explore together?`;
+        }
+
+        async function sendMessage(event) {
+            event.preventDefault();
+            
+            if (isTyping) return;
+            
+            const message = messageInput.value.trim();
+            if (!message) return;
+            
+            // Add user message
+            addMessage(message, true);
+            messageInput.value = '';
+            
+            // Show typing indicator
+            isTyping = true;
+            sendBtn.disabled = true;
+            showTyping();
+            
+            // Simulate thinking time
+            setTimeout(() => {
+                hideTyping();
+                const response = getAIResponse(message);
+                addMessage(response);
+                isTyping = false;
+                sendBtn.disabled = false;
+                messageInput.focus();
+            }, 1000 + Math.random() * 1500);
+        }
+
+        // Focus input on load
+        messageInput.focus();
+    </script>
+</body>
+</html>

@@ -109,17 +109,24 @@ function MyTripsMap({ currentUser }) {
   useEffect(() => {
     const loadTrips = async () => {
       try {
+        const userId = currentUser?.id || currentUser?.uid;
+        
         // Try to get from Firestore first
-        if (currentUser?.uid) {
+        if (userId) {
           const q = query(collection(db, 'trips'));
           const snapshot = await getDocs(q);
           const allTrips = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           
-          // Filter trips where user is host or participant
-          const userTrips = allTrips.filter(trip => 
-            trip.hostId === currentUser.uid || 
-            (trip.participants && trip.participants.includes(currentUser.uid))
-          );
+          // Filter trips where user is host or participant (check both id and uid)
+          const userTrips = allTrips.filter(trip => {
+            const isHost = trip.hostId === userId || trip.hostId === currentUser?.uid || trip.hostId === currentUser?.id;
+            const isParticipant = trip.participants && (
+              trip.participants.includes(userId) ||
+              trip.participants.includes(currentUser?.uid) ||
+              trip.participants.includes(currentUser?.id)
+            );
+            return isHost || isParticipant;
+          });
           
           // Add coordinates to each trip
           const tripsWithCoords = userTrips.map(trip => ({
@@ -137,10 +144,16 @@ function MyTripsMap({ currentUser }) {
         
         // Also check localStorage
         const storedTrips = JSON.parse(localStorage.getItem('mapmates_trips')) || [];
-        const localUserTrips = storedTrips.filter(trip => 
-          trip.hostId === currentUser?.uid || 
-          (trip.participants && trip.participants.includes(currentUser?.uid || 'demo-user'))
-        );
+        const userId2 = currentUser?.id || currentUser?.uid || 'demo-user';
+        const localUserTrips = storedTrips.filter(trip => {
+          const isHost = trip.hostId === userId2 || trip.hostId === currentUser?.uid || trip.hostId === currentUser?.id;
+          const isParticipant = trip.participants && (
+            trip.participants.includes(userId2) ||
+            trip.participants.includes(currentUser?.uid) ||
+            trip.participants.includes(currentUser?.id)
+          );
+          return isHost || isParticipant;
+        });
         
         if (localUserTrips.length > 0) {
           const localTripsWithCoords = localUserTrips.map(trip => ({

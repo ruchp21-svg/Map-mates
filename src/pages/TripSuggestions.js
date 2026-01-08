@@ -6,6 +6,80 @@ import DESTINATION_DATASET from '../utils/destinationDataset';
 import { generateEmbedding } from '../utils/embeddingUtils';
 import { subscribeToTrips } from '../firebaseUtils';
 
+// Seasonal trip suggestions data
+const SEASONAL_TRIPS = {
+  Winter: {
+    icon: '❄️',
+    months: 'December - February',
+    color: '#a8d5e5',
+    destinations: [
+      { name: 'Manali', location: 'Himachal Pradesh, India', image: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=400', reason: 'Snow-capped mountains & skiing', activities: ['Skiing', 'Snow trekking', 'Hot springs'] },
+      { name: 'Gulmarg', location: 'Kashmir, India', image: 'https://images.unsplash.com/photo-1579616043990-a9c0c0e63e5f?w=400', reason: 'Best ski resort in Asia', activities: ['Skiing', 'Gondola rides', 'Snow photography'] },
+      { name: 'Auli', location: 'Uttarakhand, India', image: 'https://images.unsplash.com/photo-1548013146-72479768bada?w=400', reason: 'Scenic snow trails', activities: ['Skiing', 'Cable car', 'Himalayan views'] },
+      { name: 'Shimla', location: 'Himachal Pradesh, India', image: 'https://images.unsplash.com/photo-1597074866923-dc0589150358?w=400', reason: 'Colonial charm in snow', activities: ['Mall Road walk', 'Ice skating', 'Heritage tours'] },
+      { name: 'Ladakh', location: 'Jammu & Kashmir, India', image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400', reason: 'Frozen lakes & monasteries', activities: ['Chadar Trek', 'Monastery visits', 'Stargazing'] }
+    ]
+  },
+  Spring: {
+    icon: '🌸',
+    months: 'March - May',
+    color: '#f8c8dc',
+    destinations: [
+      { name: 'Valley of Flowers', location: 'Uttarakhand, India', image: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400', reason: 'Blooming alpine flowers', activities: ['Trekking', 'Photography', 'Nature walks'] },
+      { name: 'Srinagar', location: 'Kashmir, India', image: 'https://images.unsplash.com/photo-1593181629936-11c609b8db9b?w=400', reason: 'Tulip gardens & houseboats', activities: ['Tulip festival', 'Shikara rides', 'Mughal gardens'] },
+      { name: 'Munnar', location: 'Kerala, India', image: 'https://images.unsplash.com/photo-1516738901171-8eb4fc13bd20?w=400', reason: 'Lush tea plantations', activities: ['Tea tasting', 'Trekking', 'Wildlife spotting'] },
+      { name: 'Darjeeling', location: 'West Bengal, India', image: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=400', reason: 'Tea gardens & toy train', activities: ['Tea tours', 'Toy train ride', 'Tiger Hill sunrise'] },
+      { name: 'Coorg', location: 'Karnataka, India', image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400', reason: 'Coffee plantations bloom', activities: ['Coffee tours', 'Waterfall visits', 'Trekking'] }
+    ]
+  },
+  Summer: {
+    icon: '☀️',
+    months: 'June - August',
+    color: '#ffd700',
+    destinations: [
+      { name: 'Leh-Ladakh', location: 'Jammu & Kashmir, India', image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400', reason: 'Best time for road trips', activities: ['Bike trips', 'Pangong Lake', 'Monastery hopping'] },
+      { name: 'Spiti Valley', location: 'Himachal Pradesh, India', image: 'https://images.unsplash.com/photo-1585409677983-0f6c41ca9c3b?w=400', reason: 'High altitude desert beauty', activities: ['Road trip', 'Stargazing', 'Key Monastery'] },
+      { name: 'Nainital', location: 'Uttarakhand, India', image: 'https://images.unsplash.com/photo-1571536802807-30451e3955d8?w=400', reason: 'Escape the heat', activities: ['Boating', 'Cable car', 'Mall Road shopping'] },
+      { name: 'Ooty', location: 'Tamil Nadu, India', image: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=400', reason: 'Pleasant hill station weather', activities: ['Botanical gardens', 'Toy train', 'Tea estates'] },
+      { name: 'Kashmir', location: 'Jammu & Kashmir, India', image: 'https://images.unsplash.com/photo-1593181629936-11c609b8db9b?w=400', reason: 'Paradise on Earth in summer', activities: ['Houseboat stay', 'Gulmarg meadows', 'Pahalgam'] }
+    ]
+  },
+  Monsoon: {
+    icon: '🌧️',
+    months: 'July - September',
+    color: '#90EE90',
+    destinations: [
+      { name: 'Cherrapunji', location: 'Meghalaya, India', image: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400', reason: 'Wettest place on Earth', activities: ['Living root bridges', 'Waterfall visits', 'Caving'] },
+      { name: 'Coorg', location: 'Karnataka, India', image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400', reason: 'Misty coffee estates', activities: ['Monsoon trekking', 'Waterfall rappelling', 'Plantation walks'] },
+      { name: 'Udaipur', location: 'Rajasthan, India', image: 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=400', reason: 'Lakes fill up beautifully', activities: ['Lake Pichola', 'Palace visits', 'Cultural shows'] },
+      { name: 'Lonavala', location: 'Maharashtra, India', image: 'https://images.unsplash.com/photo-1545308175-0e5c3f6a2c4d?w=400', reason: 'Waterfalls & greenery', activities: ['Waterfall trekking', 'Valley views', 'Bhaja caves'] },
+      { name: 'Wayanad', location: 'Kerala, India', image: 'https://images.unsplash.com/photo-1516738901171-8eb4fc13bd20?w=400', reason: 'Lush green paradise', activities: ['Wildlife safari', 'Tree house stay', 'Bamboo rafting'] }
+    ]
+  },
+  Autumn: {
+    icon: '🍂',
+    months: 'October - November',
+    color: '#d2691e',
+    destinations: [
+      { name: 'Rajasthan', location: 'India', image: 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=400', reason: 'Perfect weather for forts', activities: ['Desert safari', 'Fort visits', 'Cultural festivals'] },
+      { name: 'Goa', location: 'India', image: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=400', reason: 'Beach season begins', activities: ['Beach parties', 'Water sports', 'Nightlife'] },
+      { name: 'Rishikesh', location: 'Uttarakhand, India', image: 'https://images.unsplash.com/photo-1545126178-862cdb469409?w=400', reason: 'Adventure sports season', activities: ['River rafting', 'Bungee jumping', 'Yoga retreats'] },
+      { name: 'Hampi', location: 'Karnataka, India', image: 'https://images.unsplash.com/photo-1584483766114-2cea6facdf57?w=400', reason: 'Best weather for ruins', activities: ['Temple exploration', 'Boulder climbing', 'Sunset views'] },
+      { name: 'Rann of Kutch', location: 'Gujarat, India', image: 'https://images.unsplash.com/photo-1545126178-862cdb469409?w=400', reason: 'Rann Utsav festival', activities: ['White desert views', 'Cultural performances', 'Handicraft shopping'] }
+    ]
+  }
+};
+
+// Get current season
+const getCurrentSeason = () => {
+  const month = new Date().getMonth() + 1;
+  if (month >= 3 && month <= 5) return 'Spring';
+  if (month >= 6 && month <= 8) return 'Summer';
+  if (month >= 7 && month <= 9) return 'Monsoon';
+  if (month >= 10 && month <= 11) return 'Autumn';
+  return 'Winter';
+};
+
 function TripSuggestions({ currentUser }) {
   const navigate = useNavigate();
   const [suggestions, setSuggestions] = useState([]);
@@ -17,6 +91,8 @@ function TripSuggestions({ currentUser }) {
   const [noResults, setNoResults] = useState(false);
   const [userInsights, setUserInsights] = useState(null);
   const [showAdvancedInsights, setShowAdvancedInsights] = useState(false);
+  const [selectedSeason, setSelectedSeason] = useState(getCurrentSeason());
+  const [showSeasonalSuggestions, setShowSeasonalSuggestions] = useState(true);
 
   // Extract region from location
   const extractRegion = useCallback((location) => {
@@ -302,6 +378,85 @@ function TripSuggestions({ currentUser }) {
           </div>
         </div>
       )}
+
+      {/* 🌤️ SEASONAL TRIP SUGGESTIONS */}
+      <div className="seasonal-section">
+        <div className="seasonal-header">
+          <h2>{SEASONAL_TRIPS[selectedSeason].icon} Seasonal Trip Suggestions</h2>
+          <button 
+            className="toggle-seasonal-btn"
+            onClick={() => setShowSeasonalSuggestions(!showSeasonalSuggestions)}
+          >
+            {showSeasonalSuggestions ? 'Hide' : 'Show'}
+          </button>
+        </div>
+        
+        {showSeasonalSuggestions && (
+          <>
+            {/* Season Selector */}
+            <div className="season-tabs">
+              {Object.entries(SEASONAL_TRIPS).map(([season, data]) => (
+                <button
+                  key={season}
+                  className={`season-tab ${selectedSeason === season ? 'active' : ''}`}
+                  onClick={() => setSelectedSeason(season)}
+                  style={{ 
+                    borderColor: selectedSeason === season ? data.color : 'transparent',
+                    backgroundColor: selectedSeason === season ? `${data.color}20` : 'transparent'
+                  }}
+                >
+                  <span className="season-icon">{data.icon}</span>
+                  <span className="season-name">{season}</span>
+                  <span className="season-months">{data.months}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Current Season Badge */}
+            <div className="current-season-badge">
+              <span>📅 Current Season: <strong>{getCurrentSeason()}</strong></span>
+              {selectedSeason === getCurrentSeason() && (
+                <span className="best-time-badge">✨ Best time to travel!</span>
+              )}
+            </div>
+
+            {/* Seasonal Destinations */}
+            <div className="seasonal-destinations-grid">
+              {SEASONAL_TRIPS[selectedSeason].destinations.map((dest, idx) => (
+                <div key={idx} className="seasonal-card">
+                  <div 
+                    className="seasonal-card-image"
+                    style={{ backgroundImage: `url(${dest.image})` }}
+                  >
+                    <div className="seasonal-card-overlay">
+                      <span className="seasonal-rank">#{idx + 1}</span>
+                    </div>
+                  </div>
+                  <div className="seasonal-card-content">
+                    <h4>{dest.name}</h4>
+                    <p className="seasonal-location">📍 {dest.location}</p>
+                    <p className="seasonal-reason">{SEASONAL_TRIPS[selectedSeason].icon} {dest.reason}</p>
+                    <div className="seasonal-activities">
+                      {dest.activities.map((activity, i) => (
+                        <span key={i} className="activity-tag">{activity}</span>
+                      ))}
+                    </div>
+                    <button 
+                      className="btn-explore-seasonal"
+                      onClick={() => {
+                        const mapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(dest.name + ' ' + dest.location)}`;
+                        window.open(mapsUrl, '_blank');
+                      }}
+                    >
+                      🗺️ Explore
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
 
       {/* Interest Filter */}
       <div className="filter-section">

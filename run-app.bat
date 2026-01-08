@@ -1,0 +1,9 @@
+@echo off
+echo Starting MapMates React App with AI Chatbot...
+echo.
+echo Installing dependencies...
+call npm install
+echo.
+echo Starting development server...
+call npm start
+pause

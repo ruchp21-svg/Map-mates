@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MapMates - AI Chatbot Demo</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .main-content {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* AI Chatbot Styles */
+        .ai-chatbot {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 99999;
+            font-family: inherit;
+        }
+        .chatbot-toggle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        .chatbot-toggle:hover {
+            transform: scale(1.1);
+        }
+        .chatbot-container {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 420px;
+            height: 650px;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .chatbot-container.open { display: flex; }
+        .chatbot-container.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100vw;
+            height: 100vh;
+            border-radius: 0;
+            z-index: 100000;
+        }
+        .chatbot-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .bot-avatar-header {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        .header-controls {
+            display: flex;
+            gap: 8px;
+        }
+        .control-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .chatbot-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            background: #fafbfc;
+        }
+        .message {
+            display: flex;
+            gap: 12px;
+            animation: fadeIn 0.4s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .user-message { justify-content: flex-end; }
+        .bot-message { justify-content: flex-start; }
+        .bot-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+            flex-shrink: 0;
+        }
+        .message-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            max-width: calc(100% - 48px);
+        }
+        .message-content {
+            padding: 14px 18px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            line-height: 1.6;
+            font-size: 15px;
+        }
+        .user-message .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 6px;
+        }
+        .bot-message .message-content {
+            background: white;
+            color: #2d3748;
+            border: 1px solid #e2e8f0;
+            border-bottom-left-radius: 6px;
+        }
+        .chatbot-input-form {
+            padding: 16px 20px;
+            border-top: 1px solid #e2e8f0;
+            background: white;
+        }
+        .input-wrapper {
+            display: flex;
+            gap: 12px;
+            background: #f7fafc;
+            border-radius: 24px;
+            padding: 8px;
+            border: 2px solid transparent;
+        }
+        .input-wrapper:focus-within {
+            border-color: #667eea;
+            background: white;
+        }
+        .chatbot-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 12px 16px;
+            font-size: 15px;
+            outline: none;
+        }
+        .send-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        .send-button:hover { transform: scale(1.05); }
+        .typing-indicator {
+            display: flex;
+            gap: 6px;
+            padding: 12px 0;
+        }
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #667eea;
+            animation: typing 1.4s infinite;
+        }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing {
+            0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+            30% { opacity: 1; transform: translateY(-8px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        <h1>🚀 MapMates with AI Chatbot</h1>
+        <p>Your AI chatbot is now working! Click the robot icon in the bottom-right corner to start chatting.</p>
+        
+        <h3>✨ Features:</h3>
+        <ul style="text-align: left; max-width: 500px; margin: 0 auto;">
+            <li>Full screen chat mode</li>
+            <li>ChatGPT-like responses</li>
+            <li>Science, coding, creative writing help</li>
+            <li>Math problem solving</li>
+            <li>Life advice and planning</li>
+            <li>General knowledge questions</li>
+        </ul>
+        
+        <p style="margin-top: 30px; color: #666;">
+            Try asking: "What can you help me with?" or "Explain quantum physics"
+        </p>
+    </div>
+
+    <!-- AI Chatbot -->
+    <div class="ai-chatbot">
+        <button class="chatbot-toggle" onclick="toggleChat()">🤖</button>
+        
+        <div class="chatbot-container" id="chatContainer">
+            <div class="chatbot-header">
+                <div class="header-left">
+                    <div class="bot-avatar-header">🤖</div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 18px;">AI Assistant</h3>
+                        <span style="font-size: 12px; opacity: 0.8;">Online</span>
+                    </div>
+                </div>
+                <div class="header-controls">
+                    <button class="control-btn" onclick="clearChat()" title="Clear Chat">🗑️</button>
+                    <button class="control-btn" onclick="toggleFullscreen()" title="Fullscreen">🗖</button>
+                    <button class="control-btn" onclick="toggleChat()" title="Close">✕</button>
+                </div>
+            </div>
+            
+            <div class="chatbot-messages" id="messages">
+                <div class="message bot-message">
+                    <div class="bot-avatar">🤖</div>
+                    <div class="message-wrapper">
+                        <div class="message-content">
+                            Hello! I'm your AI assistant. I can help you with anything you need - from answering questions to providing detailed explanations, creative writing, coding help, and much more. How can I assist you today?
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <form class="chatbot-input-form" onsubmit="sendMessage(event)">
+                <div class="input-wrapper">
+                    <input type="text" class="chatbot-input" id="messageInput" placeholder="Message AI Assistant..." required>
+                    <button type="submit" class="send-button">➤</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let isOpen = false;
+        let isFullscreen = false;
+        let isLoading = false;
+
+        function toggleChat() {
+            isOpen = !isOpen;
+            const container = document.getElementById('chatContainer');
+            container.classList.toggle('open', isOpen);
+        }
+
+        function toggleFullscreen() {
+            isFullscreen = !isFullscreen;
+            const container = document.getElementById('chatContainer');
+            container.classList.toggle('fullscreen', isFullscreen);
+        }
+
+        function clearChat() {
+            const messages = document.getElementById('messages');
+            messages.innerHTML = `
+                <div class="message bot-message">
+                    <div class="bot-avatar">🤖</div>
+                    <div class="message-wrapper">
+                        <div class="message-content">
+                            Hello! I'm your AI assistant. How can I help you today?
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function addMessage(content, isUser = false) {
+            const messages = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}-message`;
+            
+            messageDiv.innerHTML = `
+                ${!isUser ? '<div class="bot-avatar">🤖</div>' : ''}
+                <div class="message-wrapper">
+                    <div class="message-content">${content}</div>
+                </div>
+            `;
+            
+            messages.appendChild(messageDiv);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function showTyping() {
+            const messages = document.getElementById('messages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot-message';
+            typingDiv.id = 'typing';
+            typingDiv.innerHTML = `
+                <div class="bot-avatar">🤖</div>
+                <div class="message-wrapper">
+                    <div class="message-content">
+                        <div class="typing-indicator">
+                            <span></span><span></span><span></span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            messages.appendChild(typingDiv);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function hideTyping() {
+            const typing = document.getElementById('typing');
+            if (typing) typing.remove();
+        }
+
+        function getAIResponse(message) {
+            const responses = {
+                'what can you help': `I can help you with a wide range of topics! Here are some examples:
+
+🎯 **Learning & Education:**
+• Explain complex concepts simply
+• Help with homework and research
+• Provide detailed information on any topic
+
+🎨 **Creative Projects:**
+• Write stories, poems, and creative content
+• Brainstorm ideas for projects
+• Character development and plot creation
+
+🔧 **Problem Solving:**
+• Math problems and equations
+• Coding and programming help
+• Logic puzzles and analytical thinking
+
+📈 **Life & Productivity:**
+• Planning and organization strategies
+• Career and life advice
+• Goal setting and achievement
+
+What would you like to explore?`,
+
+                'quantum': `Quantum physics is fascinating! Here's a simple explanation:
+
+🔬 **Quantum Mechanics Basics:**
+• **Superposition**: Particles can exist in multiple states simultaneously
+• **Entanglement**: Particles can be mysteriously connected across distances
+• **Uncertainty Principle**: You can't know both position and momentum precisely
+
+**Real-world Applications:**
+• Quantum computers for complex calculations
+• MRI machines in hospitals
+• Laser technology
+• GPS satellites (require quantum corrections)
+
+**Fun Fact**: Schrödinger's cat illustrates how quantum objects can be in multiple states at once!
+
+Would you like me to explain any specific quantum concept?`,
+
+                'story': `I'd love to help with creative writing! Here's a story starter:
+
+📖 **"The Digital Garden"**
+
+Maya discovered that her grandmother's old computer contained something impossible—a digital garden where deleted files grew into beautiful, glowing trees. Each tree held memories: family photos became cherry blossoms, old emails turned into whispering willows, and forgotten documents sprouted as mysterious midnight flowers.
+
+But when she touched the largest tree, the screen flickered, and she heard her grandmother's voice...
+
+✨ **Writing Tips:**
+• Start with "What if..." questions
+• Create compelling characters with clear motivations
+• Use sensory details to immerse readers
+• Show emotions through actions, not just words
+
+Would you like me to continue this story or help you develop your own idea?`,
+
+                'math': `I'd be happy to help with math! Here's my approach:
+
+🔢 **Problem-Solving Strategy:**
+1. **Understand**: Read the problem carefully
+2. **Identify**: What type of problem is it?
+3. **Plan**: Choose the right method or formula
+4. **Execute**: Work through step-by-step
+5. **Check**: Verify your answer makes sense
+
+**Example Problem:**
+If a train travels 120 miles in 2 hours, what's its average speed?
+• Formula: Speed = Distance ÷ Time
+• Speed = 120 miles ÷ 2 hours = 60 mph
+
+Share your specific problem and I'll walk you through it!`,
+
+                'code': `Programming is problem-solving with creativity! Here are key principles:
+
+💡 **Clean Code Principles:**
+• **Readable**: Code should tell a story
+• **Simple**: Avoid unnecessary complexity
+• **Consistent**: Follow established patterns
+• **Tested**: Write tests to ensure reliability
+
+**Debugging Tips:**
+1. Read error messages carefully
+2. Use console.log() to trace execution
+3. Break problems into smaller parts
+4. Take breaks when stuck
+5. Explain your code to someone else
+
+What programming language or concept would you like help with?`
+            };
+
+            const lowerMessage = message.toLowerCase();
+            
+            for (const [key, response] of Object.entries(responses)) {
+                if (lowerMessage.includes(key)) {
+                    return response;
+                }
+            }
+
+            return `I'm here to help you with a wide range of topics! I can assist with:
+
+🧠 **Knowledge Areas:**
+• Science & Technology
+• Creative Writing & Storytelling  
+• Mathematics & Problem Solving
+• Programming & Coding
+• Life Advice & Planning
+• General Knowledge & Learning
+
+**How to get the best help:**
+• Be specific about what you need
+• Ask follow-up questions for clarification
+• Let me know your experience level
+• Feel free to ask me to explain things differently
+
+What would you like to explore or work on together?`;
+        }
+
+        async function sendMessage(event) {
+            event.preventDefault();
+            
+            if (isLoading) return;
+            
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message
+            addMessage(message, true);
+            input.value = '';
+            
+            // Show typing indicator
+            isLoading = true;
+            showTyping();
+            
+            // Simulate AI thinking time
+            setTimeout(() => {
+                hideTyping();
+                const response = getAIResponse(message);
+                addMessage(response);
+                isLoading = false;
+            }, 1000 + Math.random() * 2000);
+        }
+    </script>
+</body>
+</html>

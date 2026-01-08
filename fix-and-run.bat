@@ -1,0 +1,6 @@
+@echo off
+echo Installing React dependencies...
+npm install react-scripts --save-dev
+npm install
+echo Starting app...
+npx react-scripts start
