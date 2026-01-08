@@ -131,8 +131,8 @@ function App() {
               <Route path="/host/:hostId" element={isAuthenticated ? <HostProfile currentUser={currentUser} /> : <Navigate to="/login" />} />
               <Route path="/ai-chat" element={isAuthenticated ? <AIChatbotPage currentUser={currentUser} /> : <Navigate to="/login" />} />
             </Routes>
-            {/* AI Chatbot - Available on all pages */}
-            <AIChatbot />
+            {/* AI Chatbot - Only show when logged in */}
+            {isAuthenticated && <AIChatbot />}
           </>
         )}
       </div>
